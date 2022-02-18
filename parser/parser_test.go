@@ -78,3 +78,34 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 
 	return true
 }
+
+func TestReturnStatements(t *testing.T) {
+	input := `
+return 5;
+return 10;
+return add(15);
+`
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 3 {
+		t.Fatalf("expected len of program.Statements to be 3, got=%d", len(program.Statements))
+	}
+
+	for _, stmt := range program.Statements {
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("expected stmt to be a *ast.ReturnStatement, got=%T", stmt)
+			continue
+		}
+		if returnStmt.TokenLiteral() != "return" {
+			t.Errorf("expected returnStmt.TokenLiteral() to be 'return', got=%q", returnStmt.TokenLiteral())
+		}
+	}
+}
