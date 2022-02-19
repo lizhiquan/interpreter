@@ -1,9 +1,10 @@
 package parser
 
 import (
+	"testing"
+
 	"interpreter/ast"
 	"interpreter/lexer"
-	"testing"
 )
 
 func TestLetStatements(t *testing.T) {
@@ -127,6 +128,39 @@ func TestIdentifierExpression(t *testing.T) {
 	}
 	if ident.TokenLiteral() != "foobar" {
 		t.Errorf("expected ident.TokenLiteral() to be 'foobar', got=%s", ident.TokenLiteral())
+	}
+}
+
+func TestIntegerLiteralExpression(t *testing.T) {
+	input := "5;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 1 {
+		t.Fatalf("expected len of program.Statements to be 1, got=%d", len(program.Statements))
+	}
+
+	stmt := program.Statements[0]
+	exprStmt, ok := stmt.(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expected stmt to be a *ast.ExpressionStatement, got=%T", stmt)
+	}
+
+	literal, ok := exprStmt.Expression.(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("expected exprStmt.Expression to be a *ast.IntegerLiteral, got=%T", exprStmt.Expression)
+	}
+	if literal.Value != 5 {
+		t.Errorf("expected literal.Value to be 5, got=%d", literal.Value)
+	}
+	if literal.TokenLiteral() != "5" {
+		t.Errorf("expected ident.TokenLiteral() to be '5', got=%s", literal.TokenLiteral())
 	}
 }
 
